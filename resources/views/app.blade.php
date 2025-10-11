@@ -11,7 +11,11 @@
     <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
     <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
 
-    <pre id="content" style="white-space: pre-wrap;"></pre>
+    <input type="text" id="filter_input" placeholder="email">
+    <button id="apply_filter_button" onclick="applyFilter()">Apply Filter</button>
+
+    <pre id="filters_content" style="white-space: pre-wrap;"></pre>
+    <pre id="labels_content" style="white-space: pre-wrap;"></pre>
 
     <script type="text/javascript">
       /* exported gapiLoaded */
@@ -35,6 +39,8 @@
 
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
+      document.getElementById('filter_input').style.visibility = 'hidden';
+      document.getElementById('apply_filter_button').style.visibility = 'hidden';
 
       /**
        * Callback after api.js is loaded.
@@ -88,6 +94,8 @@
           }
           document.getElementById('signout_button').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Refresh';
+          document.getElementById('filter_input').style.visibility = 'visible';
+          document.getElementById('apply_filter_button').style.visibility = 'visible';
           await listLabels();
         };
 
@@ -109,7 +117,10 @@
         if (token !== null) {
           google.accounts.oauth2.revoke(token.access_token);
           gapi.client.setToken('');
-          document.getElementById('content').innerText = '';
+          document.getElementById('labels_content').innerText = '';
+          document.getElementById('filters_content').innerText = '';
+          document.getElementById('filter_input').style.visibility = 'hidden';
+          document.getElementById('apply_filter_button').style.visibility = 'hidden';
           document.getElementById('authorize_button').innerText = 'Authorize';
           document.getElementById('signout_button').style.visibility = 'hidden';
         }
@@ -126,20 +137,63 @@
             'userId': 'me',
           });
         } catch (err) {
-          document.getElementById('content').innerText = err.message;
+          document.getElementById('labels_content').innerText = err.message;
           return;
         }
         const labels = response.result.labels;
         if (!labels || labels.length == 0) {
-          document.getElementById('content').innerText = 'No labels found.';
+          document.getElementById('labels_content').innerText = 'No labels found.';
           return;
         }
         // Flatten to string to display
         const output = labels.reduce(
             (str, label) => `${str}${label.name}\n`,
             'Labels:\n');
-        document.getElementById('content').innerText = output;
+        document.getElementById('labels_content').innerText = output;
       }
+
+      async function applyFilter() {
+        const filter = document.getElementById('filter_input').value;
+        // await showFilters(filter);
+
+        let response;
+        try {
+          response = await gapi.client.gmail.users.messages.list({
+            'userId': 'me', 'maxResults': 1, 'labelIds' :["INBOX"], 'q':'from:' + filter
+          });
+        } catch (err) {
+          document.getElementById('filters_content').innerText = err.message;
+          return;
+        }
+        const emailId = response.result.messages[0].id;
+        console.log("This is the emails response result in apply Filter");
+        console.log(emailId);
+        // if (!labels || labels.length == 0) {
+        //   document.getElementById('filters_content').innerText = 'No labels found.';
+        //   return;
+        // }
+
+        let response2;
+        try {
+            response2 = await gapi.client.gmail.users.messages.get({
+                'userId': 'me', 'id': emailId
+            });
+        } catch (err) {
+            document.getElementById('filters_content').innerText = err.message;
+          return;
+        }
+        console.log("response2 result");
+        console.log(response2.result);
+        const emailMessage = response2.result.snippet;
+        // Flatten to string to display
+        // const output = labels.reduce(
+        //     (str, label) => `${str}${label.name}\n`,
+        //     'Labels:\n');
+        const output = emailMessage;
+        document.getElementById('filters_content').innerText = output;
+      }
+
+
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
