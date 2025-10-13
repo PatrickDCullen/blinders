@@ -11,7 +11,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, filters } from '@/routes';
+import { dashboard } from '@/routes';
+import { index } from '@/routes/filters';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, Filter, Folder, LayoutGrid } from 'lucide-vue-next';
@@ -25,7 +26,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Email Filters',
-        href: filters(),
+        href: index(),
         icon: Filter,
     }
 ];

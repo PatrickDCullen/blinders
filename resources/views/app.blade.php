@@ -19,6 +19,7 @@
             })();
         </script>
 
+        {{-- Google Oauth and API for Gmail --}}
         <script async defer src="https://apis.google.com/js/api.js" ></script>
         <script async defer src="https://accounts.google.com/gsi/client" ></script>
 

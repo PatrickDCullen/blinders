@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { filters } from '@/routes';
+import { index, store } from '@/routes/filters';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, Form } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import Heading from '@/components/Heading.vue';
 import {
@@ -13,18 +13,32 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import Button from '@/components/ui/button/Button.vue';
+import Input from '@/components/ui/input/Input.vue';
 import { FilterX, Mail } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
+import { ButtonGroup } from '@/components/ui/button-group';
+
+defineProps({ filters: Object });
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Email Filters',
-        href: filters().url,
+        href: index().url,
     },
 ];
 
 const isAuthed = ref(false);
+const filter = ref('');
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -151,6 +165,9 @@ onMounted(() => {
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
+            <!-- <p>Filters: {{ filters }}</p>
+            <p>{{ !!filters.length }}</p>
+            <p>{{ isAuthed && !filters.length }}</p> -->
             <div
                 :class="!isAuthed ? 'border border-dashed' : ''"
                 class="content-center relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
@@ -167,7 +184,8 @@ onMounted(() => {
                         <Button @click="handleAuthClick">Authorize Gmail</Button>
                     </EmptyContent>
                 </Empty>
-                <Empty v-else>
+
+                <Empty v-else-if="isAuthed && !filters.length">
                     <EmptyHeader>
                     <EmptyMedia variant="icon">
                         <FilterX />
@@ -176,9 +194,28 @@ onMounted(() => {
                     <EmptyDescription>Add a filter to get started.</EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
-                        <Button @click="handleSignoutClick">Revoke Gmail Access</Button>
+                        <Form :action="store()" method="post" resetOnSuccess>
+                            <ButtonGroup>
+                                <Input placeholder="Search..." type="text" name="filter" />
+                                <Button type="submit">Add Filter</Button>
+                            </ButtonGroup>
+                        </Form>
+                        <Button variant="destructive" @click="handleSignoutClick">Revoke Gmail Access</Button>
                     </EmptyContent>
                 </Empty>
+                <Table v-else>
+                    <TableCaption>A list of your recent Gmail filters.</TableCaption>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Filter</TableHead>
+                        </TableRow>
+                        <TableRow v-for="filter in filters" :key="filter.id">
+                            <TableCell>
+                                {{ filter.filter }}
+                            </TableCell>
+                        </TableRow>
+                    </TableHeader>
+                </Table>
             </div>
 
         </div>
