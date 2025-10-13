@@ -203,19 +203,30 @@ onMounted(() => {
                         <Button variant="destructive" @click="handleSignoutClick">Revoke Gmail Access</Button>
                     </EmptyContent>
                 </Empty>
-                <Table v-else>
-                    <TableCaption>A list of your recent Gmail filters.</TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Filter</TableHead>
-                        </TableRow>
-                        <TableRow v-for="filter in filters" :key="filter.id">
-                            <TableCell>
-                                {{ filter.filter }}
-                            </TableCell>
-                        </TableRow>
-                    </TableHeader>
-                </Table>
+                <div v-else>
+                    <div class="flex justify-end pr-4">
+                        <Form :action="store()" method="post" resetOnSuccess>
+                            <ButtonGroup>
+                                <Input placeholder="Search..." type="text" name="filter" />
+                                <Button type="submit">Add Filter</Button>
+                            </ButtonGroup>
+                        </Form>
+                    </div>
+                    <Table>
+                        <TableCaption>A list of your recent Gmail filters.</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Filter</TableHead>
+                            </TableRow>
+                            <TableRow v-for="filter in filters" :key="filter.id">
+                                <TableCell>
+                                    {{ filter.filter }}
+                                </TableCell>
+                            </TableRow>
+                        </TableHeader>
+                    </Table>
+
+                </div>
             </div>
 
         </div>
