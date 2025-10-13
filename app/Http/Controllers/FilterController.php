@@ -17,6 +17,11 @@ class FilterController extends Controller
         ]);
     }
 
+    public function show(Filter $filter)
+    {
+        return Inertia::render('Filter/Show', $filter);
+    }
+
     public function store(Request $request)
     {
         // Validate the filter (we don't care)

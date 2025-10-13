@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { index, store } from '@/routes/filters';
+import { index, store, show } from '@/routes/filters';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Form } from '@inertiajs/vue3';
+import { Head, Form, Link } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import Heading from '@/components/Heading.vue';
 import {
@@ -111,47 +111,6 @@ function handleSignoutClick() {
     }
 }
 
-async function applyFilter() {
-    const filter = document.getElementById('filter_input').value;
-    // await showFilters(filter);
-
-    let response;
-    try {
-        response = await gapi.client.gmail.users.messages.list({
-        'userId': 'me', 'maxResults': 1, 'labelIds' :["INBOX"], 'q':'from:' + filter
-        });
-    } catch (err) {
-        document.getElementById('filters_content').innerText = err.message;
-        return;
-    }
-    const emailId = response.result.messages[0].id;
-    console.log("This is the emails response result in apply Filter");
-    console.log(emailId);
-    // if (!labels || labels.length == 0) {
-    //   document.getElementById('filters_content').innerText = 'No labels found.';
-    //   return;
-    // }
-
-    let response2;
-    try {
-        response2 = await gapi.client.gmail.users.messages.get({
-            'userId': 'me', 'id': emailId
-        });
-    } catch (err) {
-        document.getElementById('filters_content').innerText = err.message;
-        return;
-    }
-    console.log("response2 result");
-    console.log(response2.result);
-    const emailMessage = response2.result.snippet;
-    // Flatten to string to display
-    // const output = labels.reduce(
-    //     (str, label) => `${str}${label.name}\n`,
-    //     'Labels:\n');
-    const output = emailMessage;
-    document.getElementById('filters_content').innerText = output;
-}
-
 onMounted(() => {
     gapiLoaded();
     gisLoaded();
@@ -165,9 +124,6 @@ onMounted(() => {
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
-            <!-- <p>Filters: {{ filters }}</p>
-            <p>{{ !!filters.length }}</p>
-            <p>{{ isAuthed && !filters.length }}</p> -->
             <div
                 :class="!isAuthed ? 'border border-dashed' : ''"
                 class="content-center relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
@@ -220,7 +176,9 @@ onMounted(() => {
                             </TableRow>
                             <TableRow v-for="filter in filters" :key="filter.id">
                                 <TableCell>
-                                    {{ filter.filter }}
+                                    <Link :href="show(filter.id)">
+                                        {{ filter.filter }}
+                                    </Link>
                                 </TableCell>
                             </TableRow>
                         </TableHeader>
