@@ -27,8 +27,11 @@ import Input from '@/components/ui/input/Input.vue';
 import { FilterX, Mail } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { ButtonGroup } from '@/components/ui/button-group';
+import { useAuthStore } from '@/stores/authStore';
 
 defineProps({ filters: Object });
+
+const authStore = useAuthStore();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,7 +40,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const isAuthed = ref(false);
+// const isAuthed = ref(false);
 const filter = ref('');
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -86,17 +89,27 @@ function handleAuthClick() {
         if (resp.error !== undefined) {
             throw (resp);
         }
-        isAuthed.value = true;
+        console.log("changing isAuthed to true");
+        // This includes access_token, expires_in, scope and token_type
+        // console.log(resp);
+        authStore.setToAuthed();
+        // isAuthed.value = true;
     };
+
+    console.log(gapi.client.getToken());
+    // console.log(tokenClient);
 
     if (gapi.client.getToken() === null) {
         // Prompt the user to select a Google Account and ask for consent to share their data
         // when establishing a new session.
+        console.log("consent prompt")
         tokenClient.requestAccessToken({prompt: 'consent'});
     } else {
         // Skip display of account chooser and consent dialog for an existing session.
+        console.log("non-consent prompt")
         tokenClient.requestAccessToken({prompt: ''});
     }
+    console.log("end of handling auth click");
 }
 
 /**
@@ -107,7 +120,7 @@ function handleSignoutClick() {
     if (token !== null) {
         google.accounts.oauth2.revoke(token.access_token);
         gapi.client.setToken('');
-        isAuthed.value = false;
+        authStore.setToUnauthed();
     }
 }
 
@@ -124,11 +137,12 @@ onMounted(() => {
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
+        <!-- <Button @click="handleAuthClick">Authorize Gmail</Button> -->
             <div
-                :class="!isAuthed ? 'border border-dashed' : ''"
+                :class="!authStore.isAuthed ? 'border border-dashed' : ''"
                 class="content-center relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
             >
-                <Empty v-if="!isAuthed">
+                <Empty v-if="!authStore.isAuthed">
                     <EmptyHeader>
                     <EmptyMedia variant="icon">
                         <Mail />
@@ -141,7 +155,7 @@ onMounted(() => {
                     </EmptyContent>
                 </Empty>
 
-                <Empty v-else-if="isAuthed && !filters.length">
+                <Empty v-else-if="authStore.isAuthed && !filters.length">
                     <EmptyHeader>
                     <EmptyMedia variant="icon">
                         <FilterX />

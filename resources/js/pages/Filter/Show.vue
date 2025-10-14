@@ -4,7 +4,7 @@ import { index, store, show } from '@/routes/filters';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({ filter: String });
 
@@ -14,6 +14,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: index().url,
     },
 ];
+
+const snippet = ref("");
 
 async function applyFilter() {
     const filter = props.filter;
@@ -54,6 +56,7 @@ async function applyFilter() {
     //     'Labels:\n');
     const output = emailMessage;
     console.log(output);
+    snippet.value = output;
 }
 
 onMounted(() => {
@@ -89,6 +92,7 @@ onMounted(() => {
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
             >
                 <!-- <PlaceholderPattern /> -->
+                 <p>{{  snippet }}</p>
 
             </div>
         </div>
