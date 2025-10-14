@@ -3,8 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { index, store, show } from '@/routes/filters';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Form, Link } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
-import Heading from '@/components/Heading.vue';
 import {
   Empty,
   EmptyContent,
@@ -15,7 +13,6 @@ import {
 } from '@/components/ui/empty';
 import {
   Table,
-  TableBody,
   TableCaption,
   TableCell,
   TableHead,
@@ -40,7 +37,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// const isAuthed = ref(false);
 const filter = ref('');
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -89,27 +85,17 @@ function handleAuthClick() {
         if (resp.error !== undefined) {
             throw (resp);
         }
-        console.log("changing isAuthed to true");
-        // This includes access_token, expires_in, scope and token_type
-        // console.log(resp);
         authStore.setToAuthed();
-        // isAuthed.value = true;
     };
-
-    console.log(gapi.client.getToken());
-    // console.log(tokenClient);
 
     if (gapi.client.getToken() === null) {
         // Prompt the user to select a Google Account and ask for consent to share their data
         // when establishing a new session.
-        console.log("consent prompt")
         tokenClient.requestAccessToken({prompt: 'consent'});
     } else {
         // Skip display of account chooser and consent dialog for an existing session.
-        console.log("non-consent prompt")
         tokenClient.requestAccessToken({prompt: ''});
     }
-    console.log("end of handling auth click");
 }
 
 /**
@@ -137,7 +123,6 @@ onMounted(() => {
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
-        <!-- <Button @click="handleAuthClick">Authorize Gmail</Button> -->
             <div
                 :class="!authStore.isAuthed ? 'border border-dashed' : ''"
                 class="content-center relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"

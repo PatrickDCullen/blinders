@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { index, store, show } from '@/routes/filters';
+import { index } from '@/routes/filters';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
@@ -19,7 +19,6 @@ const snippet = ref("");
 
 async function applyFilter() {
     const filter = props.filter;
-    // await showFilters(filter);
 
     let response;
     try {
@@ -33,10 +32,6 @@ async function applyFilter() {
     const emailId = response.result.messages[0].id;
     console.log("This is the emails response result in apply Filter");
     console.log(emailId);
-    // if (!labels || labels.length == 0) {
-    //   document.getElementById('filters_content').innerText = 'No labels found.';
-    //   return;
-    // }
 
     let response2;
     try {
@@ -47,16 +42,9 @@ async function applyFilter() {
         console.error(err.message);
         return;
     }
-    console.log("response2 result");
-    console.log(response2.result);
     const emailMessage = response2.result.snippet;
-    // Flatten to string to display
-    // const output = labels.reduce(
-    //     (str, label) => `${str}${label.name}\n`,
-    //     'Labels:\n');
-    const output = emailMessage;
-    console.log(output);
-    snippet.value = output;
+    console.log(emailMessage);
+    snippet.value = emailMessage;
 }
 
 onMounted(() => {
@@ -91,9 +79,7 @@ onMounted(() => {
             <div
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
             >
-                <!-- <PlaceholderPattern /> -->
                  <p>{{  snippet }}</p>
-
             </div>
         </div>
     </AppLayout>
